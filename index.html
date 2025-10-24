@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MR Reviewers</title>
+  <style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    background: #000;
+    color: #f3f3f3;
+    overflow-x: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2.4em;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 900px;
+    background: #23232a;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px #000a;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .form-row {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1em;
+  }
+
+  .lists {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2em;
+    width: 100%;
+    margin-top: 1em;
+  }
+
+  .roulette-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* Indicadores acima */
+  #selectedIndicators {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1em;
+    margin-bottom: 40px;
+  }
+
+  #selectedIndicators .indicator {
+    min-width: 60px;
+    padding: 0.4em 1em;
+    border-radius: 50px;
+    background: #23232a;
+    border: 2px solid #444;
+    color: #ACE000;
+    font-weight: bold;
+    font-size: 1em;
+    text-align: center;
+    transition: all 0.25s;
+  }
+
+  /* A roleta em si */
+  .roulette-canvas {
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    box-shadow: 0 10px 50px #000c;
+    margin-bottom: 1.5em;
+    transition: transform 0.4s ease;
+  }
+
+  .roulette-canvas:hover {
+    transform: scale(1.04);
+  }
+
+  /* Ponteiro */
+  .roulette-pointer {
+    position: absolute;
+    top: calc(50% - 250px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 32px solid #FB0234;
+    filter: drop-shadow(0 0 8px #FB0234);
+    z-index: 10;
+  }
+
+  /* Área de botões e texto */
+  .roulette-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 1em;
+    gap: 1em;
+  }
+
+  /* Botões */
+  .roulette-btn {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .roulette-btn:hover {
+    opacity: 0.7;
+    box-shadow: 0 4px 14px #111;
+  }
+
+  #drawBtn {
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 0.7em 2.5em;
+    margin-top: 10px;
+    color: #eee;
+    background: #FB0234;
+  }
+
+  #updateBtn {
+    font-size: 0.85em;
+    padding: 0.5em 1.5em;
+    position: absolute;
+    top: -4px;
+    right: -120px;
+    color: #eee;
+    background: #FF6F09;
+  }
+
+  #removeBtn {
+    font-size: 0.85em;
+    padding: 0.5em 1.5em;
+    color: #eee;
+    background: #AC0031;
+  }
+
+  #restoreBtn {
+    font-size: 0.85em;
+    padding: 0.5em 1.5em;
+    color: #333;
+    background: #ACE000;
+  }
+
+
+
+  .unavailable-section {
+    width: 100%;
+    background: #1c1c21;
+    padding: 0 20px;
+    margin-bottom: -20px;
+    padding-bottom: 20px;
+  }
+  
+  .unavailable-section h3 {
+    text-align: center;
+    color: #f3d700;
+    margin-bottom: 0.8em;
+  }
+
+  .unavailable-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+  }
+
+  .unavailable-section li {
+    color: #aaa;
+    text-decoration: line-through;
+    cursor: pointer;
+    font-size: 1em;
+    display: inline-block;
+    padding: 4px;
+    border-radius: 4px;
+  }
+
+  .unavailable-section li:hover {
+    background: #333;
+    color: #fff;
+  }
+  </style>
+</head>
+<body>
+  <h1>Avaliadores de MR</h1>
+  <div class="container">
+    <div class="form-row">
+      <label>Seu nome:
+        <input type="text" id="nameInput" placeholder="preencha seu nome" />
+      </label>
+      <span class="switch">
+        <label>Disponível
+          <input type="checkbox" id="availableSwitch" />
+        </label>
+      </span>
+      <div class="reason-group" id="reasonGroup" style="display:none;">
+        <label>Motivo:
+          <input type="text" id="reasonInput" maxlength="100" placeholder="preencha o motivo" />
+        </label>
+      </div>
+      <button id="updateBtn" class="roulette-btn" >atualizar</button>
+    </div>
+    <div class="lists">
+      <button id="drawBtn" class="roulette-btn">rodar roleta</button>
+      <div class="roulette-area">
+        <div id="selectedIndicators">
+          <div class="indicator">?</div>
+          <div class="indicator">?</div>
+          <div class="indicator">?</div>
+          <div class="indicator">?</div>
+        </div>
+
+        <div class="roulette-pointer"></div>
+        <canvas id="rouletteCanvas" class="roulette-canvas" width="350" height="350"></canvas>
+
+        <div class="roulette-controls">
+          <label>Remover temporariamente:</label>
+          <select id="removeSelect">
+            <option value="">Selecionar</option>
+          </select>
+          <button id="removeBtn" class="roulette-btn" >remover</button>
+          <button id="restoreBtn" class="roulette-btn">restaurar todos</button>
+        </div>
+      </div>
+      <div class="unavailable-section">
+        <h3>Indisponíveis</h3>
+        <ul id="unavailableList"></ul>
+      </div>
+    </div>
+  <script>
+    let allPeople = [];
+    let availablePeople = [];
+    let selectedPeople = [];
+    let isSpinning = false;
+    let rouletteOrder = [];
+    let tempRemoved = [];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function drawRoulette(names, highlightIndexes=[]) {
+      const canvas = document.getElementById('rouletteCanvas');
+      const ctx = canvas.getContext('2d');
+      const size = canvas.width;
+      ctx.clearRect(0, 0, size, size);
+
+      if (!names.length) {
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "#888";
+        ctx.textAlign = "center";
+        ctx.fillText("Sem devs disponíveis!", size/2, size/2);
+        return;
+      }
+
+      const center = size/2;
+      const radius = center - 10;
+      const angleStep = 2 * Math.PI / names.length;
+      const colors = [
+        "#FB0234", "#AC0031", "#FF6F09", "#FFA60C", "#F3D700", "#ACE000"
+      ];
+
+      for (let i = 0; i < names.length; i++) {
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, radius, i*angleStep, (i+1)*angleStep);
+        ctx.closePath();
+        ctx.fillStyle = highlightIndexes.includes(i) ? "#23232a" : colors[i % colors.length];
+        ctx.fill();
+        ctx.strokeStyle = "#18181b";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(center, center);
+        ctx.rotate(i*angleStep + angleStep/2);
+        ctx.textAlign = "right";
+        ctx.font = "bold 16px Arial";
+        ctx.fillStyle = highlightIndexes.includes(i) ? "#ACE000" : "#fff";
+        ctx.shadowColor = "#18181b";
+        ctx.shadowBlur = 2;
+        ctx.fillText(names[i], radius-10, 6);
+        ctx.restore();
+      }
+    }
+
+    function refreshRoulette(highlightIndexes=[]) {
+      drawRoulette(rouletteOrder.filter(p => !tempRemoved.includes(p.name)).map(p=>p.name), highlightIndexes);
+    }
+
+    function updateRemoveSelect() {
+      const select = document.getElementById('removeSelect');
+      select.innerHTML = '<option value="">Selecionar</option>';
+      rouletteOrder.forEach(p => {
+        if (!tempRemoved.includes(p.name)) {
+          const opt = document.createElement('option');
+          opt.value = p.name;
+          opt.textContent = p.name;
+          select.appendChild(opt);
+        }
+      });
+    }
+
+    async function refreshList() {
+      const db = await fetch('/api/all-people').then(r => r.json());
+      allPeople = db.allPeople;
+      availablePeople = allPeople.filter(p => p.available);
+
+      const unavailableList = document.getElementById('unavailableList');
+      unavailableList.innerHTML = '';
+      allPeople.filter(p => !p.available).forEach(p => {
+        const li = document.createElement('li');
+        li.className = 'unavailable';
+        li.textContent = p.name;
+        let tooltip = '';
+        tooltip += `Motivo: ${p.reason ? p.reason : 'Não informado'}\n`;
+        tooltip += `Última alteração: ${p.lastUpdate ? new Date(p.lastUpdate).toLocaleString() : 'Desconhecido'}`;
+        li.title = tooltip;
+        unavailableList.appendChild(li);
+      });
+
+      rouletteOrder = shuffle([...availablePeople]);
+      refreshRoulette();
+      updateIndicators([]);
+      updateRemoveSelect();
+    }
+
+    function updateIndicators(names) {
+      const indicators = document.querySelectorAll('#selectedIndicators .indicator');
+      for (let i = 0; i < 4; i++) {
+        if (names && names[i]) {
+          indicators[i].textContent = names[i];
+          indicators[i].style.background = "#ACE000";
+          indicators[i].style.color = "#23232a";
+          indicators[i].style.borderColor = "#ACE000";
+        } else {
+          indicators[i].textContent = "?";
+          indicators[i].style.background = "#23232a";
+          indicators[i].style.color = "#ACE000";
+          indicators[i].style.borderColor = "#444";
+        }
+      }
+    }
+
+    async function savePerson(name, available, reason) {
+      await fetch('/api/people', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, available, reason })
+      });
+    }
+
+    async function updateUserStatus() {
+      const name = document.getElementById('nameInput').value.trim();
+      const available = document.getElementById('availableSwitch').checked;
+      const reason = !available ? document.getElementById('reasonInput').value.trim() : '';
+      if (!name) return;
+      await savePerson(name, available, reason);
+      refreshList();
+    }
+
+    async function fillSwitch() {
+      const name = document.getElementById('nameInput').value.trim();
+      const reasonGroup = document.getElementById('reasonGroup');
+      document.getElementById('reasonInput').value = '';
+      if (!name) {
+        document.getElementById('availableSwitch').checked = false;
+        reasonGroup.style.display = 'none';
+        return;
+      }
+      const db = await fetch('/api/all-people').then(r => r.json());
+      const person = db.allPeople.find(p => p.name.toLowerCase() === name.toLowerCase());
+      document.getElementById('availableSwitch').checked = person ? person.available : false;
+      if (person && !person.available) {
+        reasonGroup.style.display = '';
+        document.getElementById('reasonInput').value = person.reason || '';
+      } else {
+        reasonGroup.style.display = 'none';
+      }
+    }
+
+    document.getElementById('availableSwitch').onchange = function() {
+      document.getElementById('reasonGroup').style.display = this.checked ? 'none' : '';
+    };
+    document.getElementById('updateBtn').onclick = updateUserStatus;
+    document.getElementById('nameInput').oninput = fillSwitch;
+
+    document.getElementById('removeBtn').onclick = function() {
+      const select = document.getElementById('removeSelect');
+      const name = select.value;
+      if (!name) return;
+      if (!tempRemoved.includes(name)) {
+        tempRemoved.push(name);
+      }
+      refreshRoulette();
+      updateRemoveSelect();
+    };
+
+    document.getElementById('restoreBtn').onclick = function() {
+      tempRemoved = [];
+      refreshRoulette();
+      updateRemoveSelect();
+    };
+
+    document.getElementById('rouletteCanvas').onclick = async function () {
+      await runRoulette();
+    }
+
+    document.getElementById('drawBtn').onclick = async function () {
+      await runRoulette();
+    }
+
+    async function runRoulette() {
+      if (isSpinning) return;
+      await refreshList();
+
+      let roulettePool = rouletteOrder.filter(p => !tempRemoved.includes(p.name));
+      if (roulettePool.length === 0) {
+        updateIndicators([]);
+        return;
+      }
+      isSpinning = true;
+      selectedPeople = [];
+      let pool = [...roulettePool];
+      let drawCount = Math.min(4, pool.length);
+      let resultIndexes = [];
+      for (let i = 0; i < drawCount; i++) {
+        const index = Math.floor(Math.random() * pool.length);
+        selectedPeople.push(pool[index].name);
+        const globalIndex = roulettePool.findIndex(p => p.name === pool[index].name);
+        resultIndexes.push(globalIndex);
+        pool.splice(index, 1);
+      }
+
+      let totalSteps = 60 + Math.floor(Math.random()*20);
+      let currentStep = 0;
+      let currentAngle = 0;
+      let names = roulettePool.map(p=>p.name);
+      function animate() {
+        let progress = currentStep / totalSteps;
+        let ease = 1 - Math.pow(1-progress, 3);
+        let angle = 2 * Math.PI * ease * (names.length * 3 + resultIndexes[0]) / names.length;
+        currentAngle = angle;
+
+        const canvas = document.getElementById('rouletteCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.save();
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.translate(canvas.width/2, canvas.height/2);
+        ctx.rotate(currentAngle);
+        ctx.translate(-canvas.width/2, -canvas.height/2);
+        drawRoulette(names);
+        ctx.restore();
+        currentStep++;
+        if (currentStep < totalSteps) {
+          requestAnimationFrame(animate);
+        } else {
+          drawRoulette(names, resultIndexes);
+          updateIndicators(selectedPeople);
+          isSpinning = false;
+        }
+      }
+      animate();
+    }
+
+    refreshList();
+  </script>
+</body>
+</html>

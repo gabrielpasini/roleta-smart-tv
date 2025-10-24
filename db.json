@@ -1,0 +1,61 @@
+{
+  "allPeople": [
+    {
+      "name": "Adalberto",
+      "available": true
+    },
+    {
+      "name": "Andre",
+      "available": true
+    },
+    {
+      "name": "Carolina",
+      "available": true
+    },
+    {
+      "name": "Eduardo",
+      "available": false,
+      "lastUpdate": "2025-10-23T20:47:39.211Z",
+      "reason": "Licença paternidade"
+    },
+    {
+      "name": "Elen",
+      "available": true
+    },
+    {
+      "name": "Felipe",
+      "available": true
+    },
+    {
+      "name": "Fernanda",
+      "available": true
+    },
+    {
+      "name": "Gabriel",
+      "available": true,
+      "lastUpdate": "2025-10-24T16:11:52.566Z"
+    },
+    {
+      "name": "Hugo",
+      "available": true
+    },
+    {
+      "name": "Leo",
+      "available": true
+    },
+    {
+      "name": "Luan",
+      "available": false,
+      "lastUpdate": "2025-10-24T16:11:03.643Z",
+      "reason": "Muita demanda de squad"
+    },
+    {
+      "name": "Malu",
+      "available": true
+    },
+    {
+      "name": "Nathan",
+      "available": true
+    }
+  ]
+}
