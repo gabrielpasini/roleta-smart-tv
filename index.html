@@ -215,6 +215,29 @@
     cursor: pointer;
   }
 
+  .temp-removed-list {
+    text-align: center;
+    margin-top: 10px;
+    color: #f3d700;
+    font-size: 0.95em;
+  }
+
+  .temp-removed-list span {
+    background: #23232a;
+    border: 1px solid #f3d700;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin: 2px;
+    display: inline-block;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .temp-removed-list span:hover {
+    background: #f3d700;
+    color: #23232a;
+}
+
 
   .unavailable-section {
     width: 100%;
@@ -300,6 +323,7 @@
           <button id="removeBtn" class="roulette-btn" >Remover</button>
           <button id="restoreBtn" class="roulette-btn">Restaurar temporários</button>
         </div>
+        <div id="tempRemovedList" class="temp-removed-list"></div>
       </div>
       <div class="unavailable-section">
         <h3>Indisponíveis</h3>
@@ -384,6 +408,31 @@
       });
     }
 
+    function updateTempRemovedList() {
+      const container = document.getElementById('tempRemovedList');
+      container.innerHTML = '';
+
+      if (tempRemoved.length === 0) {
+        container.textContent = '';
+        container.style.color = '#777';
+        return;
+      }
+
+      container.innerHTML = 'Removidos temporariamente:<br>';
+      tempRemoved.forEach(name => {
+        const span = document.createElement('span');
+        span.textContent = name;
+        span.title = 'Clique para restaurar';
+        span.onclick = () => {
+          tempRemoved = tempRemoved.filter(n => n !== name);
+          refreshRoulette();
+          updateRemoveSelect();
+          updateTempRemovedList();
+        };
+        container.appendChild(span);
+      });
+    }
+
     async function refreshList() {
       const db = await fetch('/api/all-people').then(r => r.json());
       allPeople = db.allPeople;
@@ -437,6 +486,7 @@
       refreshRoulette();
       updateIndicators([]);
       updateRemoveSelect();
+      updateTempRemovedList();
     }
 
     function updateIndicators(names) {
@@ -528,12 +578,14 @@
       }
       refreshRoulette();
       updateRemoveSelect();
+      updateTempRemovedList();
     };
 
     document.getElementById('restoreBtn').onclick = function() {
       tempRemoved = [];
       refreshRoulette();
       updateRemoveSelect();
+      updateTempRemovedList();
     };
 
     document.getElementById('rouletteCanvas').onclick = async function () {

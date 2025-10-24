@@ -36,11 +36,12 @@
     {
       "name": "Hugo",
       "unavailable": false,
-      "lastUpdate": "2025-10-24T19:05:48.791Z"
+      "lastUpdate": "2025-10-24T19:43:36.866Z"
     },
     {
       "name": "Leo",
-      "unavailable": false
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T19:42:39.096Z"
     },
     {
       "name": "Luan",
@@ -61,7 +62,7 @@
     {
       "name": "Gabriel",
       "unavailable": false,
-      "lastUpdate": "2025-10-24T19:05:52.866Z"
+      "lastUpdate": "2025-10-24T19:43:52.809Z"
     }
   ]
 }
