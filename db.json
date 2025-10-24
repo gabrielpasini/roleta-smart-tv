@@ -2,7 +2,8 @@
   "allPeople": [
     {
       "name": "Adalberto",
-      "unavailable": false
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T19:02:34.696Z"
     },
     {
       "name": "Andre",
@@ -24,15 +25,18 @@
     },
     {
       "name": "Felipe",
-      "unavailable": false
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T19:01:56.183Z"
     },
     {
       "name": "Fernanda",
-      "unavailable": false
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T19:02:21.317Z"
     },
     {
       "name": "Hugo",
-      "unavailable": false
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T19:05:48.791Z"
     },
     {
       "name": "Leo",
@@ -47,16 +51,17 @@
     {
       "name": "Malu",
       "unavailable": false,
-      "lastUpdate": "2025-10-24T18:19:23.166Z"
+      "lastUpdate": "2025-10-24T19:02:31.019Z"
     },
     {
       "name": "Nathan",
-      "unavailable": false
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T19:02:25.524Z"
     },
     {
       "name": "Gabriel",
       "unavailable": false,
-      "lastUpdate": "2025-10-24T18:47:54.310Z"
+      "lastUpdate": "2025-10-24T19:05:52.866Z"
     }
   ]
 }
