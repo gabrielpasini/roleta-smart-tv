@@ -2,60 +2,61 @@
   "allPeople": [
     {
       "name": "Adalberto",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Andre",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Carolina",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Eduardo",
-      "available": false,
+      "unavailable": true,
       "lastUpdate": "2025-10-23T20:47:39.211Z",
       "reason": "Licença paternidade"
     },
     {
       "name": "Elen",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Felipe",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Fernanda",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Gabriel",
-      "available": true,
-      "lastUpdate": "2025-10-24T16:11:52.566Z"
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T18:19:18.295Z"
     },
     {
       "name": "Hugo",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Leo",
-      "available": true
+      "unavailable": false
     },
     {
       "name": "Luan",
-      "available": false,
+      "unavailable": true,
       "lastUpdate": "2025-10-24T16:11:03.643Z",
       "reason": "Muita demanda de squad"
     },
     {
       "name": "Malu",
-      "available": true
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T18:19:23.166Z"
     },
     {
       "name": "Nathan",
-      "available": true
+      "unavailable": false
     }
   ]
 }

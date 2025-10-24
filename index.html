@@ -216,19 +216,20 @@
         <input type="text" id="nameInput" placeholder="preencha seu nome" />
       </label>
       <span class="switch">
-        <label>Disponível
-          <input type="checkbox" id="availableSwitch" />
+        <label>Indisponível
+          <input type="checkbox" id="unavailableSwitch" />
         </label>
       </span>
+
       <div class="reason-group" id="reasonGroup" style="display:none;">
         <label>Motivo:
           <input type="text" id="reasonInput" maxlength="100" placeholder="preencha o motivo" />
         </label>
       </div>
-      <button id="updateBtn" class="roulette-btn" >atualizar</button>
+      <button id="updateBtn" class="roulette-btn" >Atualizar</button>
     </div>
     <div class="lists">
-      <button id="drawBtn" class="roulette-btn">rodar roleta</button>
+      <button id="drawBtn" class="roulette-btn">Rodar roleta</button>
       <div class="roulette-area">
         <div id="selectedIndicators">
           <div class="indicator">?</div>
@@ -245,8 +246,8 @@
           <select id="removeSelect">
             <option value="">Selecionar</option>
           </select>
-          <button id="removeBtn" class="roulette-btn" >remover</button>
-          <button id="restoreBtn" class="roulette-btn">restaurar todos</button>
+          <button id="removeBtn" class="roulette-btn" >Remover</button>
+          <button id="restoreBtn" class="roulette-btn">Restaurar termporários</button>
         </div>
       </div>
       <div class="unavailable-section">
@@ -335,11 +336,14 @@
     async function refreshList() {
       const db = await fetch('/api/all-people').then(r => r.json());
       allPeople = db.allPeople;
-      availablePeople = allPeople.filter(p => p.available);
+
+      const currentUser = document.getElementById('nameInput').value.trim().toLowerCase();
+
+      availablePeople = currentUser !== "" ? allPeople.filter(p => !p.unavailable && p.name.toLowerCase() !== currentUser) : allPeople;
 
       const unavailableList = document.getElementById('unavailableList');
       unavailableList.innerHTML = '';
-      allPeople.filter(p => !p.available).forEach(p => {
+      allPeople.filter(p => p.unavailable).forEach(p => {
         const li = document.createElement('li');
         li.className = 'unavailable';
         li.textContent = p.name;
@@ -373,21 +377,21 @@
       }
     }
 
-    async function savePerson(name, available, reason) {
+    async function savePerson(name, unavailable, reason) {
       await fetch('/api/people', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, available, reason })
+        body: JSON.stringify({ name, unavailable, reason })
       });
     }
 
     async function updateUserStatus() {
       const name = document.getElementById('nameInput').value.trim();
-      const available = document.getElementById('availableSwitch').checked;
-      const reason = !available ? document.getElementById('reasonInput').value.trim() : '';
-      if (!name) return;
-      await savePerson(name, available, reason);
+      const unavailable = document.getElementById('unavailableSwitch').checked;
+      const reason = unavailable ? document.getElementById('reasonInput').value.trim() : '';
       refreshList();
+      if (!name) return;
+      await savePerson(name, unavailable, reason);
     }
 
     async function fillSwitch() {
@@ -395,14 +399,16 @@
       const reasonGroup = document.getElementById('reasonGroup');
       document.getElementById('reasonInput').value = '';
       if (!name) {
-        document.getElementById('availableSwitch').checked = false;
+        document.getElementById('unavailableSwitch').checked = false;
         reasonGroup.style.display = 'none';
         return;
       }
+
       const db = await fetch('/api/all-people').then(r => r.json());
       const person = db.allPeople.find(p => p.name.toLowerCase() === name.toLowerCase());
-      document.getElementById('availableSwitch').checked = person ? person.available : false;
-      if (person && !person.available) {
+
+      document.getElementById('unavailableSwitch').checked = person ? person.unavailable : false;
+      if (person && person.unavailable) {
         reasonGroup.style.display = '';
         document.getElementById('reasonInput').value = person.reason || '';
       } else {
@@ -410,8 +416,8 @@
       }
     }
 
-    document.getElementById('availableSwitch').onchange = function() {
-      document.getElementById('reasonGroup').style.display = this.checked ? 'none' : '';
+    document.getElementById('unavailableSwitch').onchange = function() {
+      document.getElementById('reasonGroup').style.display = this.checked ? '' : 'none';
     };
     document.getElementById('updateBtn').onclick = updateUserStatus;
     document.getElementById('nameInput').oninput = fillSwitch;

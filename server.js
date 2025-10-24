@@ -18,8 +18,8 @@ app.get('/api/all-people', (req, res) => {
 
 // atualiza ou adiciona uma pessoa
 app.post('/api/people', (req, res) => {
-    const { name, available, reason } = req.body;
-    if (!name || typeof available !== 'boolean') {
+    const { name, unavailable, reason } = req.body;
+    if (!name || typeof unavailable !== 'boolean') {
         return res.status(400).json({ error: 'Dados inválidos' });
     }
     fs.readFile(DB_PATH, 'utf8', (err, data) => {
@@ -29,20 +29,20 @@ app.post('/api/people', (req, res) => {
         const now = new Date().toISOString();
         if (people) {
             if (
-                people.available !== available ||
+                people.unavailable !== unavailable ||
                 (reason !== undefined && people.reason !== reason)
             ) {
                 people.lastUpdate = now;
             }
-            people.available = available;
-            if (!available) {
+            people.unavailable = unavailable;
+            if (unavailable) {
                 people.reason = reason || '';
             } else {
                 delete people.reason;
             }
         } else {
-            const newPeople = { name, available };
-            if (!available) {
+            const newPeople = { name, unavailable };
+            if (unavailable) {
                 newPeople.reason = reason || '';
                 newPeople.lastUpdate = now;
             }
