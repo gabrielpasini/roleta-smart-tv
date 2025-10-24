@@ -64,7 +64,6 @@
     position: relative;
   }
 
-  /* Indicadores acima */
   #selectedIndicators {
     display: flex;
     justify-content: center;
@@ -86,7 +85,6 @@
     transition: all 0.25s;
   }
 
-  /* A roleta em si */
   .roulette-canvas {
     width: 420px;
     height: 420px;
@@ -100,7 +98,6 @@
     transform: scale(1.04);
   }
 
-  /* Ponteiro */
   .roulette-pointer {
     position: absolute;
     top: calc(50% - 250px);
@@ -115,7 +112,6 @@
     z-index: 10;
   }
 
-  /* Área de botões e texto */
   .roulette-controls {
     display: flex;
     flex-direction: row;
@@ -124,7 +120,6 @@
     gap: 1em;
   }
 
-  /* Botões */
   .roulette-btn {
     border: none;
     border-radius: 8px;
@@ -155,6 +150,16 @@
     background: #FF6F09;
   }
 
+  #deleteBtn {
+    font-size: 0.85em;
+    padding: 0.5em 1.5em;
+    position: absolute;
+    top: -4px;
+    right: -270px;
+    color: #eee;
+    background: #AC0031;
+  }
+
   #removeBtn {
     font-size: 0.85em;
     padding: 0.5em 1.5em;
@@ -169,8 +174,6 @@
     background: #ACE000;
   }
 
-
-
   .unavailable-section {
     width: 100%;
     background: #1c1c21;
@@ -178,7 +181,7 @@
     margin-bottom: -20px;
     padding-bottom: 20px;
   }
-  
+
   .unavailable-section h3 {
     text-align: center;
     color: #f3d700;
@@ -226,7 +229,9 @@
           <input type="text" id="reasonInput" maxlength="100" placeholder="preencha o motivo" />
         </label>
       </div>
-      <button id="updateBtn" class="roulette-btn" >Atualizar</button>
+      <button id="updateBtn" class="roulette-btn">Atualizar</button>
+      <!-- NOVO -->
+      <button id="deleteBtn" class="roulette-btn">Remover pessoa</button>
     </div>
     <div class="lists">
       <button id="drawBtn" class="roulette-btn">Rodar roleta</button>
@@ -247,7 +252,7 @@
             <option value="">Selecionar</option>
           </select>
           <button id="removeBtn" class="roulette-btn" >Remover</button>
-          <button id="restoreBtn" class="roulette-btn">Restaurar termporários</button>
+          <button id="restoreBtn" class="roulette-btn">Restaurar temporários</button>
         </div>
       </div>
       <div class="unavailable-section">
@@ -385,6 +390,14 @@
       });
     }
 
+    async function deletePerson(name) { // NOVO
+      await fetch('/api/people/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+    }
+
     async function updateUserStatus() {
       const name = document.getElementById('nameInput').value.trim();
       const unavailable = document.getElementById('unavailableSwitch').checked;
@@ -421,6 +434,16 @@
     };
     document.getElementById('updateBtn').onclick = updateUserStatus;
     document.getElementById('nameInput').oninput = fillSwitch;
+
+    document.getElementById('deleteBtn').onclick = async function() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) return alert('Digite o nome da pessoa que deseja remover.');
+      if (!confirm(`Tem certeza que deseja remover "${name}" permanentemente?`)) return;
+      await deletePerson(name);
+      alert(`"${name}" foi removido.`);
+      document.getElementById('nameInput').value = '';
+      refreshList();
+    };
 
     document.getElementById('removeBtn').onclick = function() {
       const select = document.getElementById('removeSelect');

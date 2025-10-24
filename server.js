@@ -22,38 +22,74 @@ app.post('/api/people', (req, res) => {
     if (!name || typeof unavailable !== 'boolean') {
         return res.status(400).json({ error: 'Dados inválidos' });
     }
+
     fs.readFile(DB_PATH, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: 'Erro ao ler db.json' });
+
         let db = JSON.parse(data);
-        let people = db.allPeople.find(p => p.name.toLowerCase() === name.toLowerCase());
+        let person = db.allPeople.find(p => p.name.toLowerCase() === name.toLowerCase());
         const now = new Date().toISOString();
-        if (people) {
+
+        if (person) {
             if (
-                people.unavailable !== unavailable ||
-                (reason !== undefined && people.reason !== reason)
+                person.unavailable !== unavailable ||
+                (reason !== undefined && person.reason !== reason)
             ) {
-                people.lastUpdate = now;
+                person.lastUpdate = now;
             }
-            people.unavailable = unavailable;
+            person.unavailable = unavailable;
             if (unavailable) {
-                people.reason = reason || '';
+                person.reason = reason || '';
             } else {
-                delete people.reason;
+                delete person.reason;
             }
         } else {
-            const newPeople = { name, unavailable };
+            const newPerson = { name, unavailable };
             if (unavailable) {
-                newPeople.reason = reason || '';
-                newPeople.lastUpdate = now;
+                newPerson.reason = reason || '';
+                newPerson.lastUpdate = now;
             }
-            db.allPeople.push(newPeople);
+            db.allPeople.push(newPerson);
         }
+
         fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), err => {
             if (err) return res.status(500).json({ error: 'Erro ao salvar db.json' });
             res.json({ success: true });
         });
     });
 });
+
+// remover uma pessoa definitivamente
+app.post('/api/people/delete', (req, res) => {
+    const { name } = req.body;
+    if (!name) {
+        return res.status(400).json({ error: 'Nome é obrigatório.' });
+    }
+
+    fs.readFile(DB_PATH, 'utf8', (err, data) => {
+        if (err) return res.status(500).json({ error: 'Erro ao ler db.json' });
+
+        let db;
+        try {
+            db = JSON.parse(data);
+        } catch {
+            return res.status(500).json({ error: 'Erro ao parsear db.json' });
+        }
+
+        const index = db.allPeople.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+        if (index === -1) {
+            return res.status(404).json({ error: 'Pessoa não encontrada.' });
+        }
+
+        const removed = db.allPeople.splice(index, 1)[0];
+
+        fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), err => {
+            if (err) return res.status(500).json({ error: 'Erro ao salvar db.json' });
+            res.json({ success: true, removed });
+        });
+    });
+});
+
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

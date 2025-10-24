@@ -31,11 +31,6 @@
       "unavailable": false
     },
     {
-      "name": "Gabriel",
-      "unavailable": false,
-      "lastUpdate": "2025-10-24T18:19:18.295Z"
-    },
-    {
       "name": "Hugo",
       "unavailable": false
     },
@@ -57,6 +52,11 @@
     {
       "name": "Nathan",
       "unavailable": false
+    },
+    {
+      "name": "Gabriel",
+      "unavailable": false,
+      "lastUpdate": "2025-10-24T18:47:54.310Z"
     }
   ]
 }
