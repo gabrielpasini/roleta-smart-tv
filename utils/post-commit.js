@@ -1,4 +1,5 @@
-const DB_PATH = path.join(__dirname, 'db.json');
+const path = require('path');
+const DB_PATH = 'db.json';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_REPO_OWNER = 'gabrielpasini';
@@ -18,7 +19,7 @@ async function commitUpdateToGithub(newDbContent, commitMessage, branch = 'main'
 
     let currentSha;
     try {
-        const responseGet = await fetch(CONTENT_API_URL, {
+        const responseGet = await fetch(`${CONTENT_API_URL}?ref=${branch}`, {
             method: 'GET',
             headers: {
                 'Authorization': `token ${GITHUB_TOKEN}`,
@@ -26,12 +27,13 @@ async function commitUpdateToGithub(newDbContent, commitMessage, branch = 'main'
             },
         });
 
+        
         if (!responseGet.ok) {
-            const errorText = await responseGet.text();
-            console.error('Erro ao obter SHA do arquivo:', responseGet.status, errorText);
-            throw new Error(`Falha ao obter SHA: ${responseGet.status}`);
+          const errorText = await responseGet.text();
+          console.error('Erro ao obter SHA do arquivo:', responseGet.status, errorText);
+          throw new Error(`Falha ao obter SHA: ${responseGet.status}`);
         }
-
+        
         const data = await responseGet.json();
         currentSha = data.sha;
         
@@ -73,3 +75,5 @@ async function commitUpdateToGithub(newDbContent, commitMessage, branch = 'main'
         throw new Error('Falha ao enviar commit para o GitHub.');
     }
 }
+
+module.exports = commitUpdateToGithub;
