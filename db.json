@@ -15,9 +15,8 @@
     },
     {
       "name": "Eduardo",
-      "unavailable": true,
-      "lastUpdate": "2025-10-23T20:47:39.211Z",
-      "reason": "Licença paternidade"
+      "unavailable": false,
+      "lastUpdate": "2025-11-17T14:22:00.297Z"
     },
     {
       "name": "Elen",
@@ -45,9 +44,8 @@
     },
     {
       "name": "Luan",
-      "unavailable": true,
-      "lastUpdate": "2025-10-24T16:11:03.643Z",
-      "reason": "Muita demanda de squad"
+      "unavailable": false,
+      "lastUpdate": "2025-11-17T14:20:37.516Z"
     },
     {
       "name": "Malu",

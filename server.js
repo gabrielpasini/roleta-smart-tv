@@ -1,3 +1,6 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -85,7 +88,20 @@ app.post('/api/people/delete', (req, res) => {
 
         fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), err => {
             if (err) return res.status(500).json({ error: 'Erro ao salvar db.json' });
-            res.json({ success: true, removed });
+
+            console.log("chegou aqui")
+
+            commitUpdateToGithub(db, `Atualização de status para ${name}`, 'fix/update-person-state')
+            .then(() => {
+                res.json({ success: true, removed });
+            })
+            .catch((commitError) => {
+                console.error('Erro fatal no commit para o GitHub:', commitError);
+                res.status(500).json({ 
+                    error: 'Dados salvos localmente, mas falha ao enviar commit para o GitHub.',
+                    detail: commitError.message 
+                });
+            });
         });
     });
 });
