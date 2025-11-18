@@ -1,95 +1,87 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
+const Person = require('./models/Person');
+
+require('dotenv').config();
 
 const app = express();
-const DB_PATH = path.join(__dirname, 'db.json');
 
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// retorna todas as pessoas
-app.get('/api/all-people', (req, res) => {
-    fs.readFile(DB_PATH, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: 'Erro ao ler db.json' });
-        res.json(JSON.parse(data));
+mongoose.connect(process.env.MONGO_DB)
+    .then(() => console.log('MongoDB conectado!'))
+    .catch(err => {
+        console.error('Erro ao conectar MongoDB:', err);
+        process.exit(1);
     });
+
+app.get('/api/all-people', async (req, res) => {
+    try {
+        const docs = await Person.find().sort({ name: 1 }).lean();
+        res.json({ allPeople: docs });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao obter pessoas' });
+    }
 });
 
-// atualiza ou adiciona uma pessoa
-app.post('/api/people', (req, res) => {
+app.post('/api/people', async (req, res) => {
     const { name, unavailable, reason } = req.body;
     if (!name || typeof unavailable !== 'boolean') {
         return res.status(400).json({ error: 'Dados inválidos' });
     }
-
-    fs.readFile(DB_PATH, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: 'Erro ao ler db.json' });
-
-        let db = JSON.parse(data);
-        let person = db.allPeople.find(p => p.name.toLowerCase() === name.toLowerCase());
-        const now = new Date().toISOString();
+    try {
+        const now = new Date();
+        let person = await Person.findOne({ name: { $regex: `^${name}$`, $options: 'i' } });
 
         if (person) {
-            if (
-                person.unavailable !== unavailable ||
-                (reason !== undefined && person.reason !== reason)
-            ) {
-                person.lastUpdate = now;
+            let changed = false;
+            if (person.unavailable !== unavailable) {
+                person.unavailable = unavailable;
+                changed = true;
             }
-            person.unavailable = unavailable;
+
             if (unavailable) {
-                person.reason = reason || '';
+                const newReason = reason || '';
+                if ((person.reason || '') !== newReason) {
+                    person.reason = newReason;
+                    changed = true;
+                }
             } else {
-                delete person.reason;
+                if (person.reason) {
+                    person.reason = undefined;
+                    changed = true;
+                }
             }
+
+            if (changed) person.lastUpdate = now;
+            await person.save();
+            return res.json({ success: true, created: false, person });
         } else {
-            const newPerson = { name, unavailable };
+            const newPerson = new Person({ name, unavailable });
             if (unavailable) {
                 newPerson.reason = reason || '';
                 newPerson.lastUpdate = now;
             }
-            db.allPeople.push(newPerson);
+            await newPerson.save();
+            return res.json({ success: true, created: true, person: newPerson });
         }
-
-        fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), err => {
-            if (err) return res.status(500).json({ error: 'Erro ao salvar db.json' });
-            res.json({ success: true });
-        });
-    });
-});
-
-// remover uma pessoa definitivamente
-app.post('/api/people/delete', (req, res) => {
-    const { name } = req.body;
-    if (!name) {
-        return res.status(400).json({ error: 'Nome é obrigatório.' });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao salvar pessoa' });
     }
-
-    fs.readFile(DB_PATH, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: 'Erro ao ler db.json' });
-
-        let db;
-        try {
-            db = JSON.parse(data);
-        } catch {
-            return res.status(500).json({ error: 'Erro ao parsear db.json' });
-        }
-
-        const index = db.allPeople.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
-        if (index === -1) {
-            return res.status(404).json({ error: 'Pessoa não encontrada.' });
-        }
-
-        const removed = db.allPeople.splice(index, 1)[0];
-
-        fs.writeFile(DB_PATH, JSON.stringify(db, null, 2), err => {
-            if (err) return res.status(500).json({ error: 'Erro ao salvar db.json' });
-            res.json({ success: true, removed });
-        });
-    });
 });
 
+app.post('/api/people/delete', async (req, res) => {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: 'Nome é obrigatório.' });
+    try {
+        const removed = await Person.findOneAndDelete({ name: { $regex: `^${name}$`, $options: 'i' } });
+        if (!removed) return res.status(404).json({ error: 'Pessoa não encontrada.' });
+        res.json({ success: true, removed });
+    } catch (err) {
+        res.status(500).json({ error: 'Erro ao remover pessoa' });
+    }
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
