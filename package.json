@@ -1,5 +1,5 @@
 {
-  "name": "roleta-smart-tv",
+  "name": "spin-review",
   "version": "1.0.0",
   "description": "Aplicação de roleta para sortear avaliadores de MR em Smart TV",
   "main": "server.js",
@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "author": "Gabriel Pasini - gabriel.pasini@g.globo",
+  "author": "Globoplay",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.3",

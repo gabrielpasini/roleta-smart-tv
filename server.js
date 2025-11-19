@@ -9,7 +9,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
-mongoose.connect(process.env.MONGO_DB)
+// coloquei a chave do MongoDB aqui para não precisarmos de variável de ambiente por enquanto
+// depois podemos utilizar algum outro banco ou forma mais simples de salvar os dados
+mongoose.connect('mongodb+srv://globoplay:smartapp@pasini.y8pg3.gcp.mongodb.net/globoplay?retryWrites=true&w=majority')
     .then(() => console.log('MongoDB conectado!'))
     .catch(err => {
         console.error('Erro ao conectar MongoDB:', err);
